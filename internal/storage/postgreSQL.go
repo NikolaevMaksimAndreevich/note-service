@@ -12,6 +12,24 @@ type PostgreSQL struct {
 	Pool *pgxpool.Pool
 }
 
+type ResultUser struct {
+	Id           int
+	Username     string
+	Email        string
+	PasswordHash string
+	CreatedAt    time.Time
+}
+
+// Получение всех заметок пользователя
+type resultNote struct {
+	Id         int
+	UserId     int
+	Title      string
+	Content    string
+	Created_at time.Time
+	Updated_at time.Time
+}
+
 // При запуске создаём таблицу, если она не была создана
 func New(storagePath string) (*PostgreSQL, error) {
 	ctx := context.Background()
@@ -27,7 +45,7 @@ func New(storagePath string) (*PostgreSQL, error) {
 		return nil, fmt.Errorf("cannot create users table: %w, %s", err, op)
 	}
 
-	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, user_id integer UNIQUE NOT NULL,title text UNIQUE NOT NULL, content text, created_at timestamp, updated_at timestamp DEFAULT NOW()")
+	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, user_id integer NOT NULL,title text NOT NULL, content text, created_at timestamp DEFAULT NOW(), updated_at timestamp DEFAULT NOW())")
 	if err != nil {
 		return nil, fmt.Errorf("cannot create notes table: %w, %s", err, op)
 	}
@@ -65,26 +83,16 @@ func (p *PostgreSQL) NoteNew(userID int, title, content string) (int, error) {
 	return id, nil
 }
 
-// Получение всех заметок пользователя
-type result struct {
-	Id         int
-	UserId     int
-	Title      string
-	Content    string
-	Created_at string
-	Updated_at string
-}
-
-func (p *PostgreSQL) NoteGet(user_id int) ([]result, error) {
+func (p *PostgreSQL) NoteGet(user_id int) ([]resultNote, error) {
 	const op = "internal/storage/postgreSQL.NoteGet"
 	ctx := context.Background()
 	rows, err := p.Pool.Query(ctx, "SELECT * FROM notes WHERE user_id = $1", user_id)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get notes: %w, %s", err, op)
 	}
-	results := []result{}
+	results := []resultNote{}
 	for rows.Next() {
-		var note result
+		var note resultNote
 		err := rows.Scan(&note.Id, &note.UserId, &note.Title, &note.Content, &note.Created_at, &note.Updated_at)
 		if err != nil {
 			return nil, fmt.Errorf("cannot scan note: %w, %s", err, op)
@@ -95,10 +103,10 @@ func (p *PostgreSQL) NoteGet(user_id int) ([]result, error) {
 }
 
 // Получаем одну заметку
-func (p *PostgreSQL) NoteGetOne(id int) (result, error) {
+func (p *PostgreSQL) NoteGetOne(id int) (resultNote, error) {
 	const op = "internal/storage/postgreSQL.NoteGetOne"
 	ctx := context.Background()
-	var note result
+	var note resultNote
 	err := p.Pool.QueryRow(ctx, "SELECT * FROM notes WHERE id = $1", id).
 		Scan(&note.Id, &note.UserId, &note.Title, &note.Content, &note.Created_at, &note.Updated_at)
 	if err != nil {
@@ -132,4 +140,17 @@ func (p *PostgreSQL) NoteDelete(id int) error {
 // Закрываем соединение с бд
 func (p *PostgreSQL) Close() {
 	p.Pool.Close()
+}
+
+// Находим пользователя по email для loginJWT
+func (p *PostgreSQL) GetUserByEmail(email string) (ResultUser, error) {
+	const op = "internal/storage/postgreSQL.GetUserByEmail"
+	ctx := context.Background()
+	var user ResultUser
+	err := p.Pool.QueryRow(ctx, "SELECT id, username, email, password_hash, created_at FROM users WHERE email = $1", email).
+		Scan(&user.Id, &user.Username, &user.Email, &user.PasswordHash, &user.CreatedAt)
+	if err != nil {
+		return user, fmt.Errorf("cannot get user: %w, %s", err, op)
+	}
+	return user, nil
 }

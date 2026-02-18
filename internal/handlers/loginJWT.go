@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"note_service/internal/authorization"
+	"note_service/internal/storage"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,7 +24,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 1️⃣ Ищем пользователя в БД
-	user, err := GetUserByEmail(req.Email)
+	user, err := storageInstance.GetUserByEmail(req.Email)
 	if err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
