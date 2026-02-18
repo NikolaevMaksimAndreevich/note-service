@@ -1,6 +1,7 @@
 package authorization
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -20,6 +21,8 @@ func GenerateToken(user_id int) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), //Токен будет действовать 24 часа
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "note_service",
+			Subject:   fmt.Sprint(user_id),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims) //Создание токена

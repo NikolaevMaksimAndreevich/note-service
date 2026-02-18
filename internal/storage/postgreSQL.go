@@ -22,12 +22,12 @@ func New(storagePath string) (*PostgreSQL, error) {
 		return nil, fmt.Errorf("cannot connect to database: %w, %s", err, op)
 	}
 
-	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, created_at timestamp)")
+	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, email VARCHAR(100) UNIQUE NOT NULL, password_hash VARCHAR(100) NOT NULL, created_at timestamp)")
 	if err != nil {
 		return nil, fmt.Errorf("cannot create users table: %w, %s", err, op)
 	}
 
-	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, user_id integer UNIQUE NOT NULL,title text UNIQUE NOT NULL, content text, created_at timestamp, updated_at timestamp)")
+	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS notes (id SERIAL PRIMARY KEY, user_id integer UNIQUE NOT NULL,title text UNIQUE NOT NULL, content text, created_at timestamp, updated_at timestamp DEFAULT NOW()")
 	if err != nil {
 		return nil, fmt.Errorf("cannot create notes table: %w, %s", err, op)
 	}
@@ -36,20 +36,21 @@ func New(storagePath string) (*PostgreSQL, error) {
 }
 
 // Создание нового пользователя
-func (p *PostgreSQL) UserNew(username string) (int, string, time.Time, error) {
+func (p *PostgreSQL) UserNew(username, email, passwordHash string) (int, string, time.Time, error) {
 	const op = "internal/storage/postgreSQL.UserNew"
-	if username == "" {
-		return 0, "", time.Time{}, fmt.Errorf("username cannot be empty")
+	if username == "" || email == "" || passwordHash == "" {
+		return 0, "", time.Time{}, fmt.Errorf("username, email, and password cannot be empty")
 	}
 	ctx := context.Background()
 	var id int
-	var userName string
-	var created_at time.Time
-	err := p.Pool.QueryRow(ctx, "INSERT INTO users (username) VALUES ($1) RETURNING id, username, created_at", username).Scan(&id, &userName, &created_at)
+	var createdAt time.Time
+	err := p.Pool.QueryRow(ctx,
+		"INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, created_at",
+		username, email, passwordHash).Scan(&id, &createdAt)
 	if err != nil {
 		return 0, "", time.Time{}, fmt.Errorf("cannot insert user: %w, %s", err, op)
 	}
-	return id, userName, created_at, nil
+	return id, username, createdAt, nil
 }
 
 // Создание новой заметки

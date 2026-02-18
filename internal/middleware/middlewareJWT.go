@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v5"
 	"note_service/internal/authorization"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type contextKey string
@@ -44,7 +45,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		claims, ok := token.Claims.(*authorization.Claims)
-		if !ok {
+		if !ok || claims == nil {
 			http.Error(w, "invalid claims", http.StatusUnauthorized)
 			return
 		}
