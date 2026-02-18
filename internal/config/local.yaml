@@ -1,0 +1,7 @@
+env: "local"
+storage_path: "user=postgres dbname=postgres dbname=notes sslmode=disable"
+http_server:
+  port: "localhost:8080"
+  timeout: 5s
+  idle_timeout: 60s
+  user: "myuser"
