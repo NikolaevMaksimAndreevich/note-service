@@ -9,13 +9,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Handler struct {
+	Storage *storage.PostgreSQL
+}
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 // Функция выдает токен для пользователя
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -24,7 +27,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 1️⃣ Ищем пользователя в БД
-	user, err := storageInstance.GetUserByEmail(req.Email)
+	user, err := h.Storage.GetUserByEmail(req.Email)
 	if err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
@@ -41,7 +44,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 3️⃣ Генерируем токен с РЕАЛЬНЫМ ID
-	token, err := authorization.GenerateToken(user.ID)
+	token, err := authorization.GenerateToken(user.Id)
 	if err != nil {
 		http.Error(w, "could not generate token", http.StatusInternalServerError)
 		return

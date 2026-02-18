@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var JwtKey = []byte("secret") //секретный ключ, которым подписывается токен
+var JwtKey = []byte("secret-key") //секретный ключ, которым подписывается токен
 
 type Claims struct {
 	UserId int `json:"user_id"`

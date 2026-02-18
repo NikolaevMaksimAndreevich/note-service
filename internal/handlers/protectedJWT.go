@@ -8,7 +8,11 @@ import (
 
 func ProtectedHandler(w http.ResponseWriter, r *http.Request) {
 
-	userID := r.Context().Value(middleware.UserIDKey).(int)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "user id not found", http.StatusUnauthorized)
+		return
+	}
 
 	response := map[string]interface{}{
 		"message": "You are authorized",
