@@ -60,9 +60,9 @@ func New(log *slog.Logger, NoteGetOneHandler NoteGetOneHandler) http.HandlerFunc
 
 		resp, err := NoteGetOneHandler.NoteGetOne(req)
 		if err != nil {
-			log.Error("failed to get note", slog.String("error", err.Error()))
-			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, map[string]string{"error": "failed to get note"})
+			log.Error("note not found")
+			render.Status(r, http.StatusNotFound)
+			render.JSON(w, r, map[string]string{"error": "note not found"})
 			return
 		}
 

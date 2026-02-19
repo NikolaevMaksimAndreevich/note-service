@@ -38,9 +38,9 @@ func New(log *slog.Logger, NoteDeleteHandler NoteDeleteHandler) http.HandlerFunc
 
 		userID, ok := r.Context().Value(mid.UserIDKey).(int)
 		if !ok {
-			log.Error("UserID not found in context")
-			render.Status(r, http.StatusInternalServerError)
-			render.JSON(w, r, map[string]string{"error": "UserID not found in context"})
+			log.Error("user not authorized")
+			render.Status(r, http.StatusUnauthorized)
+			render.JSON(w, r, map[string]string{"error": "user not authorized"})
 			return
 		}
 

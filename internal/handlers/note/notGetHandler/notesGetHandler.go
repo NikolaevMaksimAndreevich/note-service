@@ -27,11 +27,11 @@ type Response struct {
 	Notes []Note `json:"notes"`
 }
 
-type NotGetHandler interface {
-	NoteGet(req Request) (Response, error)
+type NotesGetHandler interface {
+	NotesGet(req Request) (Response, error)
 }
 
-func New(log *slog.Logger, NotGetHandler NotGetHandler) http.HandlerFunc {
+func New(log *slog.Logger, NotGetHandler NotesGetHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 		const op = "internal/handlers/note/notGetHandler/NoteGet"
@@ -47,13 +47,21 @@ func New(log *slog.Logger, NotGetHandler NotGetHandler) http.HandlerFunc {
 			return
 		}
 		req := Request{UserID: userID}
-		resp, err := NotGetHandler.NoteGet(req)
+		resp, err := NotGetHandler.NotesGet(req)
 		if err != nil {
 			log.Error("failed to get notes", slog.String("error", err.Error()))
 			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, map[string]string{"error": "failed to get notes"})
 			return
 		}
+
+		if req.UserID != userID {
+			log.Error("access forbidden")
+			render.Status(r, http.StatusForbidden)
+			render.JSON(w, r, map[string]string{"error": "access forbidden"})
+			return
+		}
+
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, resp)
 		log.Info("notes retrieved successfully")
