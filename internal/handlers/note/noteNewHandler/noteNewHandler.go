@@ -36,7 +36,16 @@ func New(log *slog.Logger, NoteNewHandler NoteNewHandler) http.HandlerFunc {
 			slog.String("operation", op),
 			slog.String("request_id", middleware.GetReqID(r.Context())))
 
+		userId, ok := r.Context().Value("user_id").(int) //По переданному токену получаем userID
+		if !ok {
+			log.Error("user not authorized")
+			render.Status(r, http.StatusUnauthorized)
+			render.JSON(w, r, map[string]string{"error": "user not authorized"})
+			return
+		}
+
 		var req Request
+		req.ID_user = userId //Передали полученный userID
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body")
