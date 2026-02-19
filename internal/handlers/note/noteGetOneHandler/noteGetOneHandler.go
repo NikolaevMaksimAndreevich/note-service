@@ -13,7 +13,6 @@ import (
 )
 
 type Request struct {
-	UserID int `json:"user_id"`
 	NoteID int `json:"note_id"`
 }
 
@@ -57,13 +56,20 @@ func New(log *slog.Logger, NoteGetOneHandler NoteGetOneHandler) http.HandlerFunc
 			render.JSON(w, r, map[string]string{"error": "invalid note id"})
 			return
 		}
-		req := Request{UserID: userID, NoteID: noteID}
+		req := Request{NoteID: noteID}
 
 		resp, err := NoteGetOneHandler.NoteGetOne(req)
 		if err != nil {
 			log.Error("failed to get note", slog.String("error", err.Error()))
 			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, map[string]string{"error": "failed to get note"})
+			return
+		}
+
+		if resp.Note.UserID != userID {
+			log.Error("access forbidden")
+			render.Status(r, http.StatusForbidden)
+			render.JSON(w, r, map[string]string{"error": "access forbidden"})
 			return
 		}
 		render.Status(r, http.StatusOK)

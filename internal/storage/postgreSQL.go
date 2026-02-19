@@ -103,11 +103,11 @@ func (p *PostgreSQL) NoteGet(user_id int) ([]resultNote, error) {
 }
 
 // Получаем одну заметку
-func (p *PostgreSQL) NoteGetOne(id int, userId int) (resultNote, error) {
+func (p *PostgreSQL) NoteGetOne(id int) (resultNote, error) {
 	const op = "internal/storage/postgreSQL.NoteGetOne"
 	ctx := context.Background()
 	var note resultNote
-	err := p.Pool.QueryRow(ctx, "SELECT * FROM notes WHERE id = $1 and user_id = $2", id, userId).
+	err := p.Pool.QueryRow(ctx, "SELECT * FROM notes WHERE id = $1", id).
 		Scan(&note.Id, &note.UserId, &note.Title, &note.Content, &note.Created_at, &note.Updated_at)
 	if err != nil {
 		return note, fmt.Errorf("cannot get note: %w, %s", err, op)

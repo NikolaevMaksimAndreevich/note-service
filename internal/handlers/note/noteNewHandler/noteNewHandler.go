@@ -65,6 +65,7 @@ func New(log *slog.Logger, NoteNewHandler NoteNewHandler) http.HandlerFunc {
 			render.JSON(w, r, map[string]string{"error": "id_user, title or content cannot be empty"})
 			return
 		}
+
 		resp, err := NoteNewHandler.NoteNew(req)
 		if err != nil {
 			log.Error("failed to create note", slog.String("error", err.Error()))
