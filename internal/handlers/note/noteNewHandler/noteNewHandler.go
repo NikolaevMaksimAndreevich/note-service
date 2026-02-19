@@ -60,6 +60,7 @@ func New(log *slog.Logger, NoteNewHandler NoteNewHandler) http.HandlerFunc {
 		content := req.Content
 
 		if idUser == 0 || title == "" || content == "" {
+			log.Error("id_user, title or content cannot be empty")
 			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, map[string]string{"error": "id_user, title or content cannot be empty"})
 			return

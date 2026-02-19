@@ -52,6 +52,7 @@ func New(log *slog.Logger, NoteGetOneHandler NoteGetOneHandler) http.HandlerFunc
 		noteIDStr := chi.URLParam(r, "note_id") // если роут: /notes/{id}
 		noteID, err := strconv.Atoi(noteIDStr)
 		if err != nil {
+			log.Error("invalid note id")
 			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, map[string]string{"error": "invalid note id"})
 			return
