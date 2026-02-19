@@ -49,7 +49,7 @@ func New(log *slog.Logger, NoteGetOneHandler NoteGetOneHandler) http.HandlerFunc
 			render.JSON(w, r, map[string]string{"error": "user not authorized"})
 			return
 		}
-		noteIDStr := chi.URLParam(r, "id") // если роут: /notes/{id}
+		noteIDStr := chi.URLParam(r, "note_id") // если роут: /notes/{id}
 		noteID, err := strconv.Atoi(noteIDStr)
 		if err != nil {
 			render.Status(r, http.StatusBadRequest)
