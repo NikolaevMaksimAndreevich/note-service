@@ -116,14 +116,14 @@ func (p *PostgreSQL) NoteGetOne(id int, userId int) (resultNote, error) {
 }
 
 // Обновляем заметку
-func (p *PostgreSQL) NoteUpdate(id int, title, content string) error {
+func (p *PostgreSQL) NoteUpdate(id int, title, content string) (updated_at time.Time, errr error) {
 	const op = "internal/storage/postgreSQL.NoteUpdate"
 	ctx := context.Background()
-	_, err := p.Pool.Exec(ctx, "UPDATE notes SET title = $1, content = $2, updated_at = NOW() WHERE id = $3", title, content, id)
+	_, err := p.Pool.Exec(ctx, "UPDATE notes SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 RETURNING updated_at", title, content, id)
 	if err != nil {
-		return fmt.Errorf("cannot update note: %w, %s", err, op)
+		return time.Time{}, fmt.Errorf("cannot update note: %w, %s", err, op)
 	}
-	return nil
+	return updated_at, nil
 }
 
 // Удаляем заметку
