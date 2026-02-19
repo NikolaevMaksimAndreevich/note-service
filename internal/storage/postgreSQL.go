@@ -86,7 +86,7 @@ func (p *PostgreSQL) NoteNew(userID int, title, content string) (int, error) {
 func (p *PostgreSQL) NoteGet(user_id int) ([]resultNote, error) {
 	const op = "internal/storage/postgreSQL.NoteGet"
 	ctx := context.Background()
-	rows, err := p.Pool.Query(ctx, "SELECT * FROM notes WHERE user_id = $1", user_id)
+	rows, err := p.Pool.Query(ctx, "SELECT * FROM notes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10", user_id)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get notes: %w, %s", err, op)
 	}
