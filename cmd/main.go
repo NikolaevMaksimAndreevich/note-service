@@ -21,7 +21,7 @@ import (
 func main() {
 	logger := slog.Default()
 
-	str := "user=postgres dbname=postgres dbname=notes sslmode=disable"
+	str := "user=postgres password=postgres dbname=notes sslmode=disable"
 	storageDB, err := storage.New(str)
 	if err != nil {
 		logger.Error("failed to create storage", slog.Any("error", err))

@@ -40,7 +40,7 @@ func New(storagePath string) (*PostgreSQL, error) {
 		return nil, fmt.Errorf("cannot connect to database: %w, %s", err, op)
 	}
 
-	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, email VARCHAR(100) UNIQUE NOT NULL, password_hash VARCHAR(100) NOT NULL, created_at timestamp)")
+	_, err = Pool.Exec(ctx, "CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(50) UNIQUE NOT NULL, email VARCHAR(100) UNIQUE NOT NULL, password_hash VARCHAR(100) NOT NULL, created_at timestamp DEFAULT NOW())")
 	if err != nil {
 		return nil, fmt.Errorf("cannot create users table: %w, %s", err, op)
 	}
