@@ -49,7 +49,7 @@ func New(storagePath string) (*PostgreSQL, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create notes table: %w, %s", err, op)
 	}
-
+	fmt.Println("Tables created successfully")
 	return &PostgreSQL{Pool: Pool}, nil
 }
 
