@@ -43,7 +43,7 @@ func main() {
 	authHandler := &handlers.Handler{
 		Storage: storageDB,
 	}
-	r.Post("/login", authHandler.LoginHandler)
+	r.Post("/login", authHandler.LoginHandler) //Используем для получения нового токена(авторизация уже существующего пользователя)
 
 	r.Post("/users", user.New(logger, userServiceNew))
 
