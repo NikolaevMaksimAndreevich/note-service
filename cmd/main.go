@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"note_service/internal/handlers"
 	"note_service/internal/handlers/note/noteDeleteHandler"
 	"note_service/internal/handlers/note/noteGetOneHandler"
 	"note_service/internal/handlers/note/noteNewHandler"
@@ -37,8 +38,12 @@ func main() {
 	noteGetOneService := &service.NoteServiceGetOne{Store: storageDB}
 
 	r := chi.NewRouter()
-
 	r.Use(middleware.Logger)
+
+	authHandler := &handlers.Handler{
+		Storage: storageDB,
+	}
+	r.Post("/login", authHandler.LoginHandler)
 
 	r.Post("/users", user.New(logger, userServiceNew))
 
