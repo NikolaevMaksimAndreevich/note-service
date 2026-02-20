@@ -1,10 +1,11 @@
-package NoteUpdateHandler
+package noteUpdateHandler
 
 import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	mid "note_service/internal/middleware"
+	"note_service/internal/storage"
 	"strconv"
 	"time"
 
@@ -19,26 +20,29 @@ type Request struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
-type resultNote struct {
-	Id         int
-	UserId     int
-	Title      string
-	Content    string
-	Created_at time.Time
-	Updated_at time.Time
-}
+
+/*
+	type resultNote struct {
+		Id         int
+		UserId     int
+		Title      string
+		Content    string
+		Created_at time.Time
+		Updated_at time.Time
+	}
+*/
 type Response struct {
 	UpdateAT time.Time `json:"update_at"`
 }
 
 type NoteUpdateHandler interface {
 	NoteUpdate(noteID int, title, content string) (time.Time, error)
-	NoteGetOne(noteID int) (resultNote, error)
+	NoteGetOne(noteID int) (storage.ResultNote, error)
 }
 
 func New(log *slog.Logger, NoteUpdateHandler NoteUpdateHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers/note/NoteUpdateHandler"
+		const op = "handlers/note/noteUpdateHandler"
 		log.With(
 			slog.String("operation", op),
 			slog.String("request_id", middleware.GetReqID(r.Context())))

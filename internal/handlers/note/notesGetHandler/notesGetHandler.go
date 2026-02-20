@@ -1,11 +1,11 @@
-package notGetHandler
+package notesGetHandler
 
 import (
 	mid "note_service/internal/middleware"
+	"note_service/internal/storage"
 
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -14,6 +14,8 @@ import (
 type Request struct {
 	UserID int `json:"user_id"`
 }
+
+/*
 type Note struct {
 	ID        int       `json:"id"`
 	UserID    int       `json:"user_id"`
@@ -24,17 +26,17 @@ type Note struct {
 }
 
 type Response struct {
-	Notes []Note `json:"notes"`
-}
+	Notes []storage.ResultNote `json:"notes"`
+}*/
 
 type NotesGetHandler interface {
-	NotesGet(req Request) (Response, error)
+	NotesGet(req Request) ([]storage.ResultNote, error)
 }
 
 func New(log *slog.Logger, NotGetHandler NotesGetHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
-		const op = "internal/handlers/note/notGetHandler/NoteGet"
+		const op = "internal/handlers/note/notesGetHandler/NoteGet"
 		log := log.With(
 			slog.String("operation", op),
 			slog.String("request_id", middleware.GetReqID(r.Context())))

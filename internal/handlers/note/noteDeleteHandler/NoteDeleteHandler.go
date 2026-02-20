@@ -1,37 +1,39 @@
-package NoteDeleteHandler
+package noteDeleteHandler
 
 import (
 	"log/slog"
 	"net/http"
 	mid "note_service/internal/middleware"
+	"note_service/internal/storage"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 )
 
-type resultNote struct {
-	Id         int
-	UserId     int
-	Title      string
-	Content    string
-	Created_at time.Time
-	Updated_at time.Time
-}
+/*
+	type resultNote struct {
+		Id         int
+		UserId     int
+		Title      string
+		Content    string
+		Created_at time.Time
+		Updated_at time.Time
+	}
+*/
 type Request struct {
 	NoteID int `json:"note_id"`
 }
 
 type NoteDeleteHandler interface {
 	NoteDelete(noteID int) error
-	NoteGetOne(noteID int) (resultNote, error)
+	NoteGetOne(noteID int) (storage.ResultNote, error)
 }
 
 func New(log *slog.Logger, NoteDeleteHandler NoteDeleteHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const op = "handlers/note/NoteDeleteHandler"
+		const op = "handlers/note/noteDeleteHandler"
 		log.With(
 			slog.String("operation", op),
 			slog.String("request_id", middleware.GetReqID(r.Context())))

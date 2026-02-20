@@ -3,6 +3,7 @@ package noteNewHandler
 import (
 	"log/slog"
 	"net/http"
+	mid "note_service/internal/middleware"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -36,7 +37,7 @@ func New(log *slog.Logger, NoteNewHandler NoteNewHandler) http.HandlerFunc {
 			slog.String("operation", op),
 			slog.String("request_id", middleware.GetReqID(r.Context())))
 
-		userId, ok := r.Context().Value("user_id").(int) //По переданному токену получаем userID
+		userId, ok := r.Context().Value(mid.UserIDKey).(int) //По переданному токену получаем userID
 		if !ok {
 			log.Error("user not authorized")
 			render.Status(r, http.StatusUnauthorized)
@@ -45,7 +46,6 @@ func New(log *slog.Logger, NoteNewHandler NoteNewHandler) http.HandlerFunc {
 		}
 
 		var req Request
-		req.ID_user = userId //Передали полученный userID
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			log.Error("failed to decode request body")
@@ -53,6 +53,7 @@ func New(log *slog.Logger, NoteNewHandler NoteNewHandler) http.HandlerFunc {
 			render.JSON(w, r, map[string]string{"error": "failed to decode request body"})
 			return
 		}
+		req.ID_user = userId //Передали полученный userID
 		log.Info("received request", slog.Any("request", req))
 
 		idUser := req.ID_user

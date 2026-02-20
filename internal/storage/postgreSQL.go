@@ -21,7 +21,7 @@ type ResultUser struct {
 }
 
 // Получение всех заметок пользователя
-type resultNote struct {
+type ResultNote struct {
 	Id         int
 	UserId     int
 	Title      string
@@ -83,16 +83,17 @@ func (p *PostgreSQL) NoteNew(userID int, title, content string) (int, error) {
 	return id, nil
 }
 
-func (p *PostgreSQL) NotesGet(user_id int) ([]resultNote, error) {
+func (p *PostgreSQL) NotesGet(user_id int) ([]ResultNote, error) {
 	const op = "internal/storage/postgreSQL.NotesGet"
 	ctx := context.Background()
 	rows, err := p.Pool.Query(ctx, "SELECT * FROM notes WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10", user_id)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get notes: %w, %s", err, op)
 	}
-	results := []resultNote{}
+	defer rows.Close()
+	results := []ResultNote{}
 	for rows.Next() {
-		var note resultNote
+		var note ResultNote
 		err := rows.Scan(&note.Id, &note.UserId, &note.Title, &note.Content, &note.Created_at, &note.Updated_at)
 		if err != nil {
 			return nil, fmt.Errorf("cannot scan note: %w, %s", err, op)
@@ -103,10 +104,10 @@ func (p *PostgreSQL) NotesGet(user_id int) ([]resultNote, error) {
 }
 
 // Получаем одну заметку
-func (p *PostgreSQL) NoteGetOne(id int) (resultNote, error) {
+func (p *PostgreSQL) NoteGetOne(id int) (ResultNote, error) {
 	const op = "internal/storage/postgreSQL.NoteGetOne"
 	ctx := context.Background()
-	var note resultNote
+	var note ResultNote
 	err := p.Pool.QueryRow(ctx, "SELECT * FROM notes WHERE id = $1", id).
 		Scan(&note.Id, &note.UserId, &note.Title, &note.Content, &note.Created_at, &note.Updated_at)
 	if err != nil {
@@ -119,7 +120,7 @@ func (p *PostgreSQL) NoteGetOne(id int) (resultNote, error) {
 func (p *PostgreSQL) NoteUpdate(id int, title, content string) (updated_at time.Time, errr error) {
 	const op = "internal/storage/postgreSQL.NoteUpdate"
 	ctx := context.Background()
-	_, err := p.Pool.Exec(ctx, "UPDATE notes SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 RETURNING updated_at", title, content, id)
+	err := p.Pool.QueryRow(ctx, "UPDATE notes SET title = $1, content = $2, updated_at = NOW() WHERE id = $3 RETURNING updated_at", title, content, id).Scan(&updated_at)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("cannot update note: %w, %s", err, op)
 	}
