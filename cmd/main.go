@@ -20,6 +20,7 @@ import (
 )
 
 func main() {
+
 	logger := slog.Default()
 
 	str := "user=postgres password=postgres dbname=notes sslmode=disable"
