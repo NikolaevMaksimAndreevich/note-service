@@ -3,22 +3,33 @@ package main
 import (
 	"log/slog"
 	"net/http"
-	"note_service/internal/handlers"
-	"note_service/internal/handlers/note/noteDeleteHandler"
-	"note_service/internal/handlers/note/noteGetOneHandler"
-	"note_service/internal/handlers/note/noteNewHandler"
-	"note_service/internal/handlers/note/noteUpdateHandler"
-	"note_service/internal/handlers/note/notesGetHandler"
-	"note_service/internal/handlers/user"
-	mid "note_service/internal/middleware"
-	"note_service/internal/service"
+	rout "note_service/internal/NewRouter"
 	"note_service/internal/storage"
 	"os"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
+func main() {
+
+	logger := slog.Default()
+
+	str := "user=postgres password=postgres dbname=notes sslmode=disable"
+	storageDB, err := storage.New(str)
+	if err != nil {
+		logger.Error("failed to create storage", slog.Any("error", err))
+		os.Exit(1)
+		return
+	}
+
+	r := rout.NewRouter(storageDB)
+
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		logger.Error("server failed", slog.Any("error", err))
+	}
+	logger.Info("server started on :8080")
+}
+
+/*
+Этот вариант main был до создания internal/NewRouter. Для автотестов нужен доступ к роутеру
 func main() {
 
 	logger := slog.Default()
@@ -40,6 +51,7 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(middleware.RequestID)
 
 	authHandler := &handlers.Handler{
 		Storage: storageDB,
@@ -62,3 +74,5 @@ func main() {
 	}
 	logger.Info("server started on :8080")
 }
+
+*/
