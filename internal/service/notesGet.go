@@ -6,7 +6,7 @@ import (
 )
 
 type NotesServiceGet struct {
-	Store *storage.PostgreSQL
+	Store storage.Storage
 }
 
 func (s *NotesServiceGet) NotesGet(req notesGetHandler.Request) ([]storage.ResultNote, error) {

@@ -3,7 +3,7 @@ package main
 import (
 	"log/slog"
 	"net/http"
-	rout "note_service/internal/NewRouter"
+	rout "note_service/internal/newRouter"
 	"note_service/internal/storage"
 	"os"
 )
@@ -29,7 +29,7 @@ func main() {
 }
 
 /*
-Этот вариант main был до создания internal/NewRouter. Для автотестов нужен доступ к роутеру
+Этот вариант main был до создания internal/newRouter. Для автотестов нужен доступ к роутеру
 func main() {
 
 	logger := slog.Default()
@@ -49,7 +49,7 @@ func main() {
 	notesServiceGet := &service.NotesServiceGet{Store: storageDB}
 	noteGetOneService := &service.NoteServiceGetOne{Store: storageDB}
 
-	r := chi.NewRouter()
+	r := chi.newRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.RequestID)
 

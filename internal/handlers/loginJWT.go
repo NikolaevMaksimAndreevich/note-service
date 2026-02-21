@@ -10,7 +10,7 @@ import (
 )
 
 type Handler struct {
-	Storage *storage.PostgreSQL
+	Storage storage.Storage
 }
 type LoginRequest struct {
 	Email    string `json:"email"`

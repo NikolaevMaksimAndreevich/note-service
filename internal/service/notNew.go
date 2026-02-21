@@ -7,7 +7,7 @@ import (
 )
 
 type NoteServiceNew struct {
-	Store *storage.PostgreSQL
+	Store storage.Storage
 }
 
 func (s *NoteServiceNew) NoteNew(req noteNewHandler.Request) (noteNewHandler.Response, error) {

@@ -1,4 +1,4 @@
-package NewRouter
+package newRouter
 
 import (
 	"log/slog"
@@ -18,7 +18,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(store *storage.PostgreSQL) http.Handler {
+func NewRouter(store storage.Storage) http.Handler {
 	logger := slog.Default()
 
 	userServiceNew := service.NewUserService(store) ////userHandler := user.New(logger, userServiceNew) можно так добавить
@@ -41,11 +41,11 @@ func NewRouter(store *storage.PostgreSQL) http.Handler {
 
 	r.Group(func(r chi.Router) {
 		r.Use(mid.JWTMiddleware)
-		r.Post("/users/{id}/notes", noteNewHandler.New(logger, noteServiceNew))
+		r.Post("/users/{id}/note", noteNewHandler.New(logger, noteServiceNew))
 		r.Get("/users/{id}/notes", notesGetHandler.New(logger, notesServiceGet))
-		r.Get("/users/{id}/notes/{note_id}", noteGetOneHandler.New(logger, noteGetOneService))
-		r.Put("/users/{id}/notes/{note_id}", noteUpdateHandler.New(logger, noteServiceUpdate))
-		r.Delete("/users/{id}/notes/{note_id}", noteDeleteHandler.New(logger, noteServiceDelete))
+		r.Get("/users/{id}/note/{note_id}", noteGetOneHandler.New(logger, noteGetOneService))
+		r.Put("/users/{id}/note/{note_id}", noteUpdateHandler.New(logger, noteServiceUpdate))
+		r.Delete("/users/{id}/note/{note_id}", noteDeleteHandler.New(logger, noteServiceDelete))
 	})
 	return r
 }

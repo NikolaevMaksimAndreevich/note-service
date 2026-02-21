@@ -4,7 +4,7 @@ import "note_service/internal/storage"
 
 // Обёртка для интерфейса NoteDeleteHandler
 type NoteServiceDel struct {
-	Store *storage.PostgreSQL
+	Store storage.Storage
 }
 
 func (s *NoteServiceDel) NoteDelete(ID int) error {

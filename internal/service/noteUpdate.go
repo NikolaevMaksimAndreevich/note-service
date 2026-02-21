@@ -6,7 +6,7 @@ import (
 )
 
 type NoteServiceUpd struct {
-	Store *storage.PostgreSQL
+	Store storage.Storage
 }
 
 func (s *NoteServiceUpd) NoteUpdate(id int, title, content string) (time.Time, error) {
